@@ -1,0 +1,10 @@
+{
+    "scripts": {
+        "debug": "npm run watch && npm run run",
+        "run": "start web-ext run -s dist\\build\\debug -f nightly -p development",
+        "watch": "start cpx -v src\\**\\* dist\\build\\debug --watch"
+    },
+    "devDependencies": {
+        "cpx": "^1.5.0"
+    }
+}

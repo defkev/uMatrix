@@ -61,16 +61,17 @@ Matrix.GrayIndirect  = Matrix.Gray | Matrix.Indirect;
 /******************************************************************************/
 
 const typeBitOffsets = new Map([
-    [      '*',  0 ],
-    [    'doc',  2 ],
-    [ 'cookie',  4 ],
-    [    'css',  6 ],
-    [  'image',  8 ],
-    [  'media', 10 ],
-    [ 'script', 12 ],
-    [  'fetch', 14 ],
-    [  'frame', 16 ],
-    [  'other', 18 ],
+    [        '*',   0 ],
+    [      'doc',   2 ],
+    [   'cookie',   4 ],
+    [      'css',   6 ],
+    [    'image',   8 ],
+    [    'media',  10 ],
+    [   'script',  12 ],
+    [    'fetch',  14 ],
+    [    'frame',  16 ],
+    [    'other',  18 ],
+    [  'referrer', 20 ],
 ]);
 
 const stateToNameMap = new Map([
@@ -90,7 +91,7 @@ const switchBitOffsets = new Map([
     [     'matrix-off',  0 ],
     [   'https-strict',  2 ],
     /* 4 is now unused, formerly assigned to UA spoofing */
-    [ 'referrer-spoof',  6 ],
+    /* 6 is now unused, formerly assigned to (legacy) referrer spoofing */
     [ 'noscript-spoof',  8 ],
     [     'no-workers', 10 ],
     [   'cname-reveal', 12 ],

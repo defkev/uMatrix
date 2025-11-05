@@ -85,6 +85,10 @@
         "message": "other",
         "description": "HAS TO FIT IN MATRIX HEADER!"
     },
+    "referrerPrettyName": {
+        "message": "referer",
+        "description": "MISSPELLED TO FIT IN MATRIX HEADER!"
+    },
 
 
     "matrixNoNetTrafficPrompt" : {

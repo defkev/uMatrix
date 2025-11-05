@@ -109,7 +109,7 @@ const onMessage = function(request, sender, callback) {
             userSettings: µm.userSettings,
             matrixSwitches: {
                 'https-strict': µm.pMatrix.evaluateSwitch('https-strict', '*') === 1,
-                'referrer-spoof': µm.pMatrix.evaluateSwitch('referrer-spoof', '*') === 1,
+                // 'referrer-spoof': µm.pMatrix.evaluateSwitch('referrer-spoof', '*') === 1,
                 'noscript-spoof': µm.pMatrix.evaluateSwitch('noscript-spoof', '*') === 1
             }
         };

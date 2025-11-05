@@ -345,8 +345,12 @@ const onBeforeSendReferrer = function(fctxt, details) {
     const pageStore = µm.mustPageStoreFromTabId(fctxt.tabId);
     pageStore.has3pReferrer = true;
 
-    const mustSpoof =
-        µm.tMatrix.evaluateSwitchZ('referrer-spoof', fctxt.getTabHostname());
+    const mustSpoof = µm.mustBlock(
+            fctxt.getTabHostname(),
+            fctxt.getHostname(),
+            'referrer'
+        );
+        // µm.tMatrix.evaluateSwitchZ('referrer-spoof', fctxt.getTabHostname());
     if ( mustSpoof === false ) { return false; }
 
     let spoofedReferrer;

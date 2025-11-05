@@ -125,7 +125,8 @@ const matrixHeaderPrettyNames = {
     'script': '',
     'fetch': '',
     'frame': '',
-    'other': ''
+    'other': '',
+    'referrer': ''
 };
 
 let firstPartyLabel = '';
@@ -615,6 +616,11 @@ const renderMatrixHeaderRow = function() {
     expandos.reqType = 'other';
     expandos.hostname = '*';
     addCellClass(cell, '*', 'other');
+    cell = cells.nodeAt(9);
+    expandos = expandosFromNode(cell);
+    expandos.reqType = 'referrer';
+    expandos.hostname = '*';
+    addCellClass(cell, '*', 'referrer');
     uDom('#matHead .matRow').css('display', '');
 };
 
@@ -673,6 +679,7 @@ const renderMatrixCellTypes = function(cells, hostname, countName) {
     renderMatrixCellType(cells.at(6), hostname, 'fetch', counts[headerIndices.get('fetch')]);
     renderMatrixCellType(cells.at(7), hostname, 'frame', counts[headerIndices.get('frame')]);
     renderMatrixCellType(cells.at(8), hostname, 'other', counts[headerIndices.get('other')]);
+    renderMatrixCellType(cells.at(9), hostname, 'referrer', counts[headerIndices.get('referrer')]);
 };
 
 /******************************************************************************/
@@ -736,6 +743,7 @@ const makeMatrixMetaRow = function(totals) {
     renderMatrixMetaCellType(cells.at(6), totals[headerIndices.get('fetch')]);
     renderMatrixMetaCellType(cells.at(7), totals[headerIndices.get('frame')]);
     renderMatrixMetaCellType(cells.at(8), totals[headerIndices.get('other')]);
+    renderMatrixMetaCellType(cells.at(9), totals[headerIndices.get('referrer')]);
     return matrixRow;
 };
 
@@ -1091,10 +1099,10 @@ const updateMatrixSwitches = function() {
         'relevant',
         matrixSnapshot.hasWebWorkers === true
     );
-    uDom.nodeFromId('mtxSwitch_referrer-spoof').classList.toggle(
-        'relevant',
-        matrixSnapshot.has3pReferrer === true
-    );
+    // uDom.nodeFromId('mtxSwitch_referrer-spoof').classList.toggle(
+    //     'relevant',
+    //     matrixSnapshot.has3pReferrer === true
+    // );
     uDom.nodeFromId('mtxSwitch_noscript-spoof').classList.toggle(
         'relevant',
         matrixSnapshot.hasNoscriptTags === true

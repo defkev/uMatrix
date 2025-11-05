@@ -1,3 +1,21 @@
+> [!NOTE]  
+> This fork adds support to properly control 3rd-party referrer-spoofing (essential implementing https://github.com/uBlockOrigin/uMatrix-issues/issues/171), mostly to unbreak embedded YouTube, which throws an arbitrary error (4 or 15) when the referrer is missing or spoofed as www.youtube.com, normally requiring disabling spoofing for the whole site or globally to unbreak.
+
+It adds a new default rule `* first-party referrer allow` which is mimicking the old `referrer-spoof: false` for 1st party requests.
+
+This completely removes support for the legacy `referrer-spoof` key, including the default `referrer-spoof: behind-the-scene false` which is now handled by the existing `matrix-off: behind-the-scene true`
+
+If you have any custom `referrer-spoof` rules in your config, you need to manually migrate them to the new syntax, e.g. `referrer-spoof: example.com true` becomes `example.com * referrer block` and `referrer-spoof: www.example.de false` becomes `www.example.com * referrer allow`
+
+There is currently no code to migrate a legacy config to the new syntax, so if you have many `referrer-spoof` rules, good luck!
+
+A signed XPI can be downloaded under releases (on the right ->)
+
+There is no PR because the original repo was archived a long time ago.
+Furthermore, this is not on AMO and probably never will be because the site is run by a bunch of technologically illiterate retards and I don't have time to play customer support for people who cannot follow a simple README but insist on reviewing other people's code they don't understand.
+
+If you have uMatrix already installed, you cannot update using this version since they have been signed with different keys. In this case, create a backup under `Settings > About > Your data > Back up to file...` uninstall gorhill's version, install this one, and restore your config using `Settings > About > Your data > Restore from file...`. Again, if you have any custom `referrer-spoof` rules write them down first!
+
 ## uMatrix<br>[<img src="https://travis-ci.org/gorhill/uMatrix.svg?branch=master" height="16">](https://travis-ci.org/gorhill/uMatrix)
 
 Definitely for advanced users.

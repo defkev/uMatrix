@@ -3,7 +3,7 @@
 		"content": "internal",
 		"updateAfter": 13,
 		"contentURL": [
-			"https://raw.githubusercontent.com/gorhill/uMatrix/master/assets/assets.json",
+			"https://raw.githubusercontent.com/defkev/uMatrix/master/assets/assets.json",
 			"assets/assets.json"
 		]
 	},
@@ -26,16 +26,6 @@
 		],
 		"supportURL": "https://someonewhocares.org/hosts/"
 	},
-	"mvps-0": {
-		"content": "filters",
-		"updateAfter": 11,
-		"title": "MVPS HOSTS",
-		"contentURL": [
-			"https://winhelp2002.mvps.org/hosts.txt",
-			"assets/thirdparties/winhelp2002.mvps.org/hosts.txt"
-		],
-		"supportURL": "https://winhelp2002.mvps.org/"
-	},
 	"plowe-0": {
 		"content": "filters",
 		"updateAfter": 13,
@@ -47,13 +37,14 @@
 		],
 		"supportURL": "https://pgl.yoyo.org/adservers/"
 	},
-	"recipes_en-0": {
-		"content": "recipes",
-		"title": "Ruleset recipes for English websites",
+	"urlhaus-0": {
+		"content": "filters",
+		"updateAfter": 12,
+		"title": "URLhaus Malicious URL Blocklist",
 		"contentURL": [
-			"https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/recipes/recipes_en.txt",
-			"assets/umatrix/recipes_en.txt"
+			"https://malware-filter.gitlab.io/malware-filter/urlhaus-filter-online.txt",
+			"assets/thirdparties/urlhaus-filter/urlhaus-filter-online.txt"
 		],
-		"lang": "en"
+		"supportURL": "https://gitlab.com/malware-filter/urlhaus-filter"
 	}
 }
