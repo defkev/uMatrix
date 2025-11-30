@@ -95,7 +95,7 @@
                Based on https://gitlab.com/smart-referrer/smart-referer/-/commit/d12e37c8007e2fad75364cb07591c18241160994 */
             Reflect.defineProperty(document.wrappedJSObject, 'referrer', {
                 get: exportFunction(() => {
-                    return window.location.origin;
+                    return window.location.origin + '/';
                 }, document)
             });
         }

@@ -5,7 +5,7 @@ It adds a new default rule `* first-party referrer allow` which is mimicking the
 
 This completely removes support for the legacy `referrer-spoof` key, including the default `referrer-spoof: behind-the-scene false` which is now handled by the existing `matrix-off: behind-the-scene true`
 
-If you have any custom `referrer-spoof` rules in your config, you need to manually migrate them to the new syntax, e.g. `referrer-spoof: example.com true` becomes `example.com * referrer block` and `referrer-spoof: www.example.de false` becomes `www.example.com * referrer allow`
+If you have any custom `referrer-spoof` rules in your config, you need to manually migrate them to the new syntax, e.g. `referrer-spoof: example.com true` becomes `example.com * referrer block` and `referrer-spoof: www.example.com false` becomes `www.example.com * referrer allow`
 
 There is currently no code to migrate a legacy config to the new syntax, so if you have many `referrer-spoof` rules, good luck!
 
