@@ -758,6 +758,10 @@ const onMessage = function(request, sender, callback) {
         }
         break;
 
+    case 'mustSpoofReferrer':
+        response = { spoof: µm.mustBlock(request.hostname, request.hostname, 'referrer') }
+        break
+
     case 'shutdown?':
         if ( tabContext !== null ) {
             response = µm.tMatrix.evaluateSwitchZ('matrix-off', srcHn);

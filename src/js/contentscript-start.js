@@ -86,4 +86,19 @@
         ev.preventDefault();
     }, true);
 
+    vAPI.messaging.send('contentscript.js', {
+        what: 'mustSpoofReferrer',
+        hostname: window.location.hostname
+    }).then(response => {
+        if (response.spoof) {
+            /* Spoof document.referrer to work around Firefox 69+ bug https://bugzilla.mozilla.org/show_bug.cgi?id=1601496
+               Based on https://gitlab.com/smart-referrer/smart-referer/-/commit/d12e37c8007e2fad75364cb07591c18241160994 */
+            Reflect.defineProperty(document.wrappedJSObject, 'referrer', {
+                get: exportFunction(() => {
+                    return window.location.origin;
+                }, document)
+            });
+        }
+    });
+
 })();

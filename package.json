@@ -2,7 +2,8 @@
     "scripts": {
         "debug": "npm run watch && npm run run",
         "run": "start web-ext run -s dist\\build\\debug -f nightly -p development",
-        "watch": "start cpx -v src\\**\\* dist\\build\\debug --watch"
+        "watch": "start cpx -v src\\**\\* dist\\build\\debug --watch",
+        "buildff": "web-ext build -s dist\\build\\uMatrix.firefox -a dist\\build\\web-ext-artifacts"
     },
     "devDependencies": {
         "cpx": "^1.5.0"
