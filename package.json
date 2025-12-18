@@ -1,9 +1,10 @@
 {
     "scripts": {
         "debug": "npm run watch && npm run run",
-        "run": "start web-ext run -s dist\\build\\debug -f nightly -p development",
+        "run": "start web-ext run -s dist\\build\\debug -f nightly -p development --devtools",
         "watch": "start cpx -v src\\**\\* dist\\build\\debug --watch",
-        "buildff": "web-ext build -s dist\\build\\uMatrix.firefox -a dist\\build\\web-ext-artifacts"
+        "buildff": "web-ext build -s dist\\build\\uMatrix.firefox -a dist\\build\\web-ext-artifacts -n {name}.firefox-v{version}.zip",
+        "buildcr": "web-ext build -s dist\\build\\uMatrix.chromium -a dist\\build\\web-ext-artifacts -n {name}.chromium-v{version}.zip"
     },
     "devDependencies": {
         "cpx": "^1.5.0"
