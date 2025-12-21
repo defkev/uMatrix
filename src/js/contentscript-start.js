@@ -30,6 +30,23 @@
 
     if ( typeof vAPI !== 'object' ) { return; }
 
+    vAPI.messaging.send('contentscript.js', {
+        what: 'referrer'
+    }).then(referrer => {
+        if (referrer) {
+            let content = '(' + ((referrer) => {
+                Reflect.defineProperty(window.document, 'referrer', {
+                    value: referrer
+                });
+            }) + ')(' + JSON.stringify(referrer) + ');';
+            let script = document.createElement('script');
+            let head = document.head || document.documentElement;
+            script.appendChild(document.createTextNode(content));
+            head.appendChild(script);
+            head.removeChild(script);
+        }
+    });
+
     vAPI.selfWorkerSrcReported = vAPI.selfWorkerSrcReported || false;
 
     const reGoodWorkerSrc = /(?:child|worker)-src[^;,]+?'none'/;
@@ -85,20 +102,5 @@
         ev.stopPropagation();
         ev.preventDefault();
     }, true);
-
-    vAPI.messaging.send('contentscript.js', {
-        what: 'mustSpoofReferrer',
-        hostname: window.location.hostname
-    }).then(response => {
-        if (response.spoof) {
-            /* Spoof document.referrer to work around Firefox 69+ bug https://bugzilla.mozilla.org/show_bug.cgi?id=1601496
-               Based on https://gitlab.com/smart-referrer/smart-referer/-/commit/d12e37c8007e2fad75364cb07591c18241160994 */
-            Reflect.defineProperty(document.wrappedJSObject, 'referrer', {
-                get: exportFunction(() => {
-                    return window.location.origin + '/';
-                }, document)
-            });
-        }
-    });
 
 })();

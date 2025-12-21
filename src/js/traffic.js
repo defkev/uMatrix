@@ -351,6 +351,7 @@ const onBeforeSendReferrer = function(fctxt, details) {
             'referrer'
         );
         // µm.tMatrix.evaluateSwitchZ('referrer-spoof', fctxt.getTabHostname());
+    pageStore.recordRequest('referrer', fctxt.url, mustSpoof);
     if ( mustSpoof === false ) { return false; }
 
     let spoofedReferrer;

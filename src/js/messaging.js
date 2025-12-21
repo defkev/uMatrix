@@ -758,8 +758,14 @@ const onMessage = function(request, sender, callback) {
         }
         break;
 
-    case 'mustSpoofReferrer':
-        response = { spoof: µm.mustBlock(request.hostname, request.hostname, 'referrer') }
+    case 'referrer':
+        let spoof = µm.mustBlock(srcHn, srcHn, 'referrer');
+        if (spoof) {
+            response = tabContext.origin + '/';
+        }
+        if (pageStore !== null) {
+            pageStore.recordRequest('referrer', tabContext.rawURL, spoof);
+        }
         break
 
     case 'shutdown?':
