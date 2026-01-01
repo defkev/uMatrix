@@ -66,6 +66,10 @@
     }
     log.info(`Ubiquitous block rules container ready ${Date.now()-vAPI.T0} ms after launch`);
 
+    if (µm.rawSettings.isolateMatrix) {
+        µm.iMatrix = new µm.Matrix();
+    }
+
     await Promise.all([
         µm.loadMatrix(),
         µm.loadHostsFiles(),

@@ -172,13 +172,13 @@ const PageStore = class {
         ) {
             const roothn = tabContext.rootHostname;
             const hnFromURI = vAPI.hostnameFromURI;
-            const tMatrix = µm.tMatrix;
+            const matrix = tabContext.incognito ? µm.iMatrix : µm.tMatrix;
             for ( const entry of request.toFilter ) {
-                if ( tMatrix.mustBlock(roothn, hnFromURI(entry.url), entry.type) ) {
+                if ( matrix.mustBlock(roothn, hnFromURI(entry.url), entry.type) ) {
                     this.blockedCollapsibles.add(
                         entry.type,
                         entry.url,
-                        tMatrix.specificityRegister < 5
+                        matrix.specificityRegister < 5
                     );
                 }
             }

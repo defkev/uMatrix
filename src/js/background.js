@@ -126,7 +126,8 @@ const rawSettingsDefault = {
             '</body></html>'
         ].join(''),
     framePlaceholderBackground: 'default',
-    suspendTabsUntilReady: 'unset'
+    suspendTabsUntilReady: 'unset',
+    isolateMatrix: true 
 };
 
 /******************************************************************************/
@@ -215,6 +216,7 @@ return {
 
     // page url => permission scope
     tMatrix: null,
+    iMatrix: null,
     pMatrix: null,
 
     ubiquitousBlacklist: null,

@@ -165,6 +165,7 @@ vAPI.messaging.send('main-blocked.js', {
     scope: details.hn,
     hostname: details.hn,
     type: details.type,
+    incognito: browser.extension.inIncognitoContext
 }).then(response => {
     if ( response === false ) {
         window.location.replace(details.url);

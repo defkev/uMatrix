@@ -198,7 +198,9 @@ const recordPageCookie = (( ) => {
             for ( const cookieKey of qentry[1] ) {
                 let cookieEntry = cookieDict.get(cookieKey);
                 if ( cookieEntry === undefined ) { continue; }
-                let blocked = µm.mustBlock(
+                const tabContext = µm.tabContextManager.lookup(pageStore.tabId);
+                let matrix = tabContext.incogonito ? µm.iMatrix : µm.tMatrix;
+                let blocked = matrix.mustBlock(
                     pageStore.pageHostname,
                     cookieEntry.hostname,
                     'cookie'
@@ -340,7 +342,8 @@ const processRemoveQueue = function() {
 
         // Query scopes only if we are going to use them
         if ( srcHostnames === undefined ) {
-            srcHostnames = µm.tMatrix.extractAllSourceHostnames();
+            srcHostnames = new Set(...µm.tMatrix.extractAllSourceHostnames(),
+                                   ...µm.iMatrix.extractAllSourceHostnames());
         }
 
         // Ensure cookie is not allowed on ALL current web pages: It can
@@ -408,7 +411,8 @@ const canRemoveCookie = function(cookieKey, srcHostnames) {
     const cookieHostname = cookieEntry.hostname;
 
     for ( const srcHostname of cookieEntry.usedOn ) {
-        if ( µm.mustAllow(srcHostname, cookieHostname, 'cookie') ) {
+        if ( !(µm.tMatrix.mustBlock(srcHostname, cookieHostname, 'cookie') ||
+               µm.iMatrix.mustBlock(srcHostname, cookieHostname, 'cookie')) ) {
             return false;
         }
     }
@@ -420,7 +424,8 @@ const canRemoveCookie = function(cookieKey, srcHostnames) {
     for (;;) {
         if (
             srcHostnames.has(srcHostname) &&
-            µm.mustAllow(srcHostname, cookieHostname, 'cookie')
+            !(µm.tMatrix.mustBlock(srcHostname, cookieHostname, 'cookie') ||
+              µm.iMatrix.mustBlock(srcHostname, cookieHostname, 'cookie'))
         ) {
             return false;
         }

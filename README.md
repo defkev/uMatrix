@@ -9,10 +9,23 @@ If you have any custom `referrer-spoof` rules in your config, you need to manual
 
 There is currently no code to migrate a legacy config to the new syntax, so if you have many `referrer-spoof` rules, good luck!
 
-A signed XPI can be downloaded under releases (on the right ->)
+> [!WARNING]
+> Starting with version `1.5.4` uMatrix for **Firefox** will isolate temporary rules from private (incognito) in non-private (normal) windows and vice-versa (https://github.com/gorhill/uMatrix/issues/350) to prevent exceptions added for domains visited in private windows from leaking into the normal browser session.
+
+Temporary rules can still be committed in either private or non-private windows and then restored in the other.
+
+Temporary rules in private windows will be cleared the moment the last private window gets closed.
+
+To restore the old (insecure) behavior of sharing temporary rulesets between windows, set `isolateMatrix` to `false` under advanced settings and restart uMatrix.
+
+**This feature is currently only available in Firefox**
+
+> [!TIP]
+> A signed Firefox XPI and packed Chrome ZIP can be downloaded under releases (on the right ->)
 
 There is no PR because the original repo was archived a long time ago.
 Furthermore, this is not on AMO and probably never will be because the site is run by a bunch of technologically illiterate retards and I don't have time to play customer support for people who cannot follow a simple README but insist on reviewing other people's code they don't understand.
+The fork also isn't on CWS (Chrome Web Store) because uMatrix heavily relies on APIs (still) not available in MV3 (Manifest Version 3) and Google no longer accepting MV2 submissions.
 
 If you have uMatrix already installed, you cannot update using this version since they have been signed with different keys. In this case, create a backup under `Settings > About > Your data > Back up to file...` uninstall gorhill's version, install this one, and restore your config using `Settings > About > Your data > Restore from file...`. Again, if you have any custom `referrer-spoof` rules write them down first!
 

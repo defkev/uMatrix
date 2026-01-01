@@ -483,7 +483,8 @@ const handleFilter = function(button, leaning) {
         what: getCellAction(desHostname, type, leaning),
         srcHostname: matrixSnapshot.scope,
         desHostname: desHostname,
-        type: type
+        type: type,
+        incognito: browser.extension.inIncognitoContext
     }).then(( ) => {
         updateMatrixSnapshot();
     });
@@ -1128,6 +1129,7 @@ const toggleMatrixSwitch = function(ev) {
         what: 'toggleMatrixSwitch',
         switchName: switchName,
         srcHostname: matrixSnapshot.scope,
+        incognito: browser.extension.inIncognitoContext
     }).then(( ) => {
         updateMatrixSnapshot();
     });
@@ -1154,6 +1156,7 @@ const persistMatrix = function() {
     vAPI.messaging.send('popup.js', {
         what: 'applyDiffToPermanentMatrix',
         diff: matrixSnapshot.diff,
+        incognito: browser.extension.inIncognitoContext
     }).then(( ) => {
         updateMatrixSnapshot();
     });
@@ -1168,6 +1171,7 @@ const revertMatrix = function() {
     vAPI.messaging.send('popup.js', {
         what: 'applyDiffToTemporaryMatrix',
         diff: matrixSnapshot.diff,
+        incognito: browser.extension.inIncognitoContext
     }).then(( ) => {
         updateMatrixSnapshot();
     });
@@ -1302,7 +1306,8 @@ const recipeManager = (( ) => {
 
 const revertAll = function() {
     vAPI.messaging.send('popup.js', {
-        what: 'revertTemporaryMatrix'
+        what: 'revertTemporaryMatrix',
+        incognito: browser.extension.inIncognitoContext
     }).then(( ) => {
         updateMatrixSnapshot();
     });
@@ -1336,6 +1341,7 @@ const gotoExtensionURL = function(ev) {
         url,
         select: true,
         shiftKey: ev.shiftKey,
+        incognito: browser.extension.inIncognitoContext
     });
     dropDownMenuHide();
     vAPI.closePopup();
@@ -1452,6 +1458,7 @@ const matrixSnapshotPoller = (( ) => {
             mtxDiffCount: matrixSnapshot.diff.length,
             pMatrixModifiedTime: matrixSnapshot.pMatrixModifiedTime,
             tMatrixModifiedTime: matrixSnapshot.tMatrixModifiedTime,
+            incognito: browser.extension.inIncognitoContext
         }).then(response => {
             onPolled(response);
         });
@@ -1480,6 +1487,7 @@ const matrixSnapshotPoller = (( ) => {
     vAPI.messaging.send('popup.js', {
         what: 'matrixSnapshot',
         tabId: matrixSnapshot.tabId,
+        incognito: browser.extension.inIncognitoContext
     }).then(response => {
         if ( response instanceof Object ) {
             matrixSnapshot = preprocessMatrixSnapshot(response);

@@ -14,7 +14,7 @@ cp ./assets/assets.json $DES/
 if [ -n "${TRAVIS_TAG}" ]; then
   pushd .. > /dev/null
   git clone --depth 1 https://github.com/uBlockOrigin/uAssets.git
-  git checkout 84dc2761abb4193bb34290aa6d90266610f735f6
+  # git checkout 84dc2761abb4193bb34290aa6d90266610f735f6
   popd > /dev/null
 fi
 
@@ -26,6 +26,7 @@ popd
 cp -R ../uAssets/thirdparties/pgl.yoyo.org               $DES/thirdparties/
 cp -R ../uAssets/thirdparties/publicsuffix.org           $DES/thirdparties/
 cp -R ../uAssets/thirdparties/someonewhocares.org        $DES/thirdparties/
+cp -R ../uAssets/thirdparties/urlhaus-filter             $DES/thirdparties/
 # cp -R ../uAssets/thirdparties/winhelp2002.mvps.org       $DES/thirdparties/
 # cp -R ../uAssets/thirdparties/www.malwaredomainlist.com  $DES/thirdparties/
 # mkdir $DES/umatrix

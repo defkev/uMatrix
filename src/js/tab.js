@@ -190,6 +190,7 @@ housekeep itself.
         this.onGCBarrier = false;
         this.netFiltering = true;
         this.netFilteringReadTime = 0;
+        this.incognito = false;
 
         tabContexts.set(tabId, this);
     };
@@ -263,7 +264,7 @@ housekeep itself.
 
     // Update just force all properties to be updated to match the most recent
     // root URL.
-    TabContext.prototype.update = function() {
+    TabContext.prototype.update = async function() {
         this.netFilteringReadTime = 0;
         if ( this.stack.length === 0 ) {
             this.rawURL =
@@ -285,6 +286,7 @@ housekeep itself.
             µm.URI.domainFromHostname(this.rootHostname) ||
             this.rootHostname;
          this.secure = µm.URI.isSecureScheme(this.scheme);
+         this.incognito = await vAPI.tabs.get(this.tabId).then(tab => tab.incognito);
     };
 
     // Called whenever a candidate root URL is spotted for the tab.
@@ -467,8 +469,17 @@ vAPI.Tabs = class extends vAPI.Tabs {
         //µMatrix.contextMenu.update(details.tabId);
     }
 
-    onClosed(tabId) {
+    async onClosed(tabId) {
         super.onClosed(tabId);
+        if (µm.rawSettings.isolateMatrix) {
+            let tabContext = µm.tabContextManager.lookup(tabId);
+            if (tabContext.incognito) {
+                let tabs = await vAPI.tabs.query({})
+                if (!tabs.some(tab => tab.incognito)) {
+                    µm.iMatrix.assign(µm.pMatrix);
+                }
+            }
+        }
         if ( vAPI.isBehindTheSceneTabId(tabId) ) { return; }
         µMatrix.unbindTabFromPageStats(tabId);
         //µMatrix.contextMenu.update();

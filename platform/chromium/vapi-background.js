@@ -505,11 +505,11 @@ vAPI.Tabs = class {
             : targetURL.slice(0, pos);
 
         const tabs = await vAPI.tabs.query({ url: targetURLWithoutHash });
-        if ( tabs.length === 0 ) {
+        let tab = tabs.find(tab => tab.incognito === details.incognito);
+        if (!tab) {
             this.create(targetURL, details);
             return;
         }
-        let tab = tabs[0];
         const updateDetails = { active: true };
         // https://github.com/uBlockOrigin/uBlock-issues/issues/592
         if ( tab.url.startsWith(targetURL) === false ) {

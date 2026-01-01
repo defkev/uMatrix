@@ -44,13 +44,13 @@ const changeUserSettings = function(name, value) {
 
 /******************************************************************************/
 
-const changeMatrixSwitch = function(switchName, state) {
-    vAPI.messaging.send('dashboard', {
-        what: 'setMatrixSwitch',
-        switchName,
-        state
-    });
-};
+// const changeMatrixSwitch = function(switchName, state) {
+//     vAPI.messaging.send('dashboard', {
+//         what: 'setMatrixSwitch',
+//         switchName,
+//         state
+//     });
+// };
 
 /******************************************************************************/
 
@@ -108,12 +108,12 @@ const onInputChanged = function(ev) {
         break;
     case 'noMixedContent':
     case 'noscriptTagsSpoofed':
-    case 'processReferer':
-        changeMatrixSwitch(
-            target.getAttribute('data-matrix-switch'),
-            target.checked
-        );
-        break;
+    // case 'processReferer':
+    //     changeMatrixSwitch(
+    //         target.getAttribute('data-matrix-switch'),
+    //         target.checked
+    //     );
+    //     break;
     case 'deleteUnusedSessionCookiesAfter':
         onChangeValueHandler(target, 'deleteUnusedSessionCookiesAfter', 15, 1440);
         break;

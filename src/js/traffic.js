@@ -31,7 +31,7 @@
 
 // Intercept and filter web requests according to white and black lists.
 
-const onBeforeRootFrameRequestHandler = function(fctxt) {
+const onBeforeRootFrameRequestHandler = function(fctxt, details) {
     const µm = µMatrix;
     const desURL = fctxt.url;
     const desHn = fctxt.getHostname();
@@ -39,8 +39,9 @@ const onBeforeRootFrameRequestHandler = function(fctxt) {
     const tabId = fctxt.tabId;
     const srcHn = fctxt.getTabHostname();
 
+    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
     // Disallow request as per matrix?
-    const blocked = µm.mustBlock(srcHn, desHn, type);
+    const blocked = matrix.mustBlock(srcHn, desHn, type);
 
     const pageStore = µm.bindTabToPageStats(tabId);
     if ( pageStore !== null ) {
@@ -61,11 +62,11 @@ const onBeforeRootFrameRequestHandler = function(fctxt) {
 
     // Not blocked
     if ( blocked !== true ) {
-        const redirectUrl = maybeRedirectRootFrame(desHn, desURL);
+        const redirectUrl = maybeRedirectRootFrame(desHn, desURL, matrix);
         if ( redirectUrl !== desURL ) {
             return { redirectUrl };
         }
-        if ( µm.tMatrix.evaluateSwitchZ('cname-reveal', srcHn) === false ) {
+        if ( matrix.evaluateSwitchZ('cname-reveal', srcHn) === false ) {
             return { cancel: false };
         }
         return;
@@ -85,10 +86,10 @@ const onBeforeRootFrameRequestHandler = function(fctxt) {
 
 // https://twitter.com/thatcks/status/958776519765225473
 
-const maybeRedirectRootFrame = function(hostname, url) {
+const maybeRedirectRootFrame = function(hostname, url, matrix) {
     const µm = µMatrix;
     if ( µm.rawSettings.enforceEscapedFragment !== true ) { return url; }
-    const block1pScripts = µm.mustBlock(hostname, hostname, 'script');
+    const block1pScripts = matrix.mustBlock(hostname, hostname, 'script');
     const reEscapedFragment = /[?&]_escaped_fragment_=/;
     if ( reEscapedFragment.test(url) ) {
         return block1pScripts ? url : url.replace(reEscapedFragment, '#!') ;
@@ -123,7 +124,7 @@ const onBeforeRequestHandler = function(details) {
     // Wherever the main doc comes from, create a receiver page URL: synthetize
     // one if needed.
     if ( type === 'doc' && details.parentFrameId === -1 ) {
-        return onBeforeRootFrameRequestHandler(fctxt);
+        return onBeforeRootFrameRequestHandler(fctxt, details);
     }
 
     // Re-classify orphan HTTP requests as behind-the-scene requests. There is
@@ -139,9 +140,10 @@ const onBeforeRequestHandler = function(details) {
     const desHn = fctxt.getHostname();
     let specificity = 0;
 
-    let blocked = µm.tMatrix.mustBlock(srcHn, desHn, type);
+    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
+    let blocked = matrix.mustBlock(srcHn, desHn, type);
     if ( blocked ) {
-        specificity = µm.tMatrix.specificityRegister;
+        specificity = matrix.specificityRegister;
     }
 
     // Record request.
@@ -156,7 +158,7 @@ const onBeforeRequestHandler = function(details) {
     if ( tabContext.secure && µmuri.isSecureScheme(desScheme) === false ) {
         pageStore.hasMixedContent = true;
         if ( blocked === false ) {
-            blocked = µm.tMatrix.evaluateSwitchZ('https-strict', srcHn);
+            blocked = matrix.evaluateSwitchZ('https-strict', srcHn);
         }
     }
 
@@ -174,7 +176,7 @@ const onBeforeRequestHandler = function(details) {
         return { cancel: true };
     }
 
-    if ( µm.tMatrix.evaluateSwitchZ('cname-reveal', srcHn) === false ) {
+    if ( matrix.evaluateSwitchZ('cname-reveal', srcHn) === false ) {
         return { cancel: false };
     }
 };
@@ -301,7 +303,8 @@ const onBeforeSendCookie = function(fctxt, details) {
     if ( iHeader === -1 ) { return false; }
 
     const µm = µMatrix;
-    const blocked = µm.mustBlock(
+    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
+    const blocked = matrix.mustBlock(
         fctxt.getTabHostname(),
         fctxt.getHostname(),
         'cookie'
@@ -345,7 +348,8 @@ const onBeforeSendReferrer = function(fctxt, details) {
     const pageStore = µm.mustPageStoreFromTabId(fctxt.tabId);
     pageStore.has3pReferrer = true;
 
-    const mustSpoof = µm.mustBlock(
+    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
+    const mustSpoof = matrix.mustBlock(
             fctxt.getTabHostname(),
             fctxt.getHostname(),
             'referrer'
@@ -404,7 +408,7 @@ const onHeadersReceivedHandler = function(details) {
         const contentType = typeFromHeaders(headers);
         if ( contentType !== undefined ) {
             details.type = contentType;
-            return onBeforeRootFrameRequestHandler(fctxt);
+            return onBeforeRootFrameRequestHandler(fctxt, details);
         }
     }
 
@@ -413,17 +417,19 @@ const onHeadersReceivedHandler = function(details) {
     const srcHn = fctxt.getTabHostname();
     const desHn = fctxt.getHostname();
 
+    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
+
     // Inline script tags.
-    if ( µm.mustBlock(srcHn, desHn, 'script' ) ) {
+    if ( matrix.mustBlock(srcHn, desHn, 'script' ) ) {
         csp.push(µm.cspNoInlineScript);
     }
 
     // Inline style tags.
-    if ( µm.mustBlock(srcHn, desHn, 'css' ) ) {
+    if ( matrix.mustBlock(srcHn, desHn, 'css' ) ) {
         csp.push(µm.cspNoInlineStyle);
     }
 
-    if ( µm.tMatrix.evaluateSwitchZ('no-workers', srcHn) ) {
+    if ( matrix.evaluateSwitchZ('no-workers', srcHn) ) {
         csp.push(µm.cspNoWorker);
     } else if ( µm.rawSettings.disableCSPReportInjection === false ) {
         cspReport.push(µm.cspNoWorker);
@@ -595,7 +601,7 @@ const typeFromHeaders = function(headers) {
 
     const handler = function(ev) {
         const matrix = ev && ev.detail;
-        if ( matrix !== µMatrix.tMatrix ) { return; }
+        if ( matrix === µMatrix.pMatrix ) { return; }
         for ( const cs of csRules ) {
             cs.mustRegister = matrix.mustBlock('file-scheme', 'file-scheme', cs.name);
             if ( cs.mustRegister === (cs.registered !== undefined) ) { continue; }

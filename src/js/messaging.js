@@ -57,10 +57,12 @@ const onMessage = function(request, sender, callback) {
 
     // Sync
     let response;
+    let matrix;
 
     switch ( request.what ) {
     case 'blacklistMatrixCell':
-        µm.tMatrix.blacklistCell(
+        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
+        matrix.blacklistCell(
             request.srcHostname,
             request.desHostname,
             request.type
@@ -76,24 +78,25 @@ const onMessage = function(request, sender, callback) {
         µm.assets.updateStart({ delay: 2000 });
         break;
 
-    case 'getCellColors':
-        const ruleParts = request.ruleParts;
-        const tColors = [];
-        const pColors = [];
-        for ( let i = 0, n = ruleParts.length; i < n; i += 3 ) {
-            tColors.push(µm.tMatrix.evaluateCellZXY(
-                ruleParts[i+0],
-                ruleParts[i+1],
-                ruleParts[i+2]
-            ));
-            pColors.push(µm.pMatrix.evaluateCellZXY(
-                ruleParts[i+0],
-                ruleParts[i+1],
-                ruleParts[i+2]
-            ));
-        }
-        response = { tColors, pColors };
-        break;
+    // UNUSED???
+    // case 'getCellColors':
+    //     const ruleParts = request.ruleParts;
+    //     const tColors = [];
+    //     const pColors = [];
+    //     for ( let i = 0, n = ruleParts.length; i < n; i += 3 ) {
+    //         tColors.push(µm.tMatrix.evaluateCellZXY(
+    //             ruleParts[i+0],
+    //             ruleParts[i+1],
+    //             ruleParts[i+2]
+    //         ));
+    //         pColors.push(µm.pMatrix.evaluateCellZXY(
+    //             ruleParts[i+0],
+    //             ruleParts[i+1],
+    //             ruleParts[i+2]
+    //         ));
+    //     }
+    //     response = { tColors, pColors };
+    //     break;
 
     case 'getDomainNames':
         response = request.targets.map(target => {
@@ -120,7 +123,8 @@ const onMessage = function(request, sender, callback) {
         break;
 
     case 'graylistMatrixCell':
-        µm.tMatrix.graylistCell(
+        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
+        matrix.graylistCell(
             request.srcHostname,
             request.desHostname,
             request.type
@@ -128,22 +132,25 @@ const onMessage = function(request, sender, callback) {
         break;
 
     case 'mustBlock':
-        response = µm.mustBlock(
+        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
+        response = matrix.mustBlock(
             request.scope,
             request.hostname,
             request.type
         );
         break;
 
-    case 'rulesetRevert':
-        µm.tMatrix.copyRuleset(request.entries, µm.pMatrix, true);
-        break;
+    // UNUSED???
+    // case 'rulesetRevert':
+    //     µm.tMatrix.copyRuleset(request.entries, µm.pMatrix, true);
+    //     break;
 
-    case 'rulesetPersist':
-        if ( µm.pMatrix.copyRuleset(request.entries, µm.tMatrix, true) ) {
-            µm.saveMatrix();
-        }
-        break;
+    // UNUSED???
+    // case 'rulesetPersist':
+    //     if ( µm.pMatrix.copyRuleset(request.entries, µm.tMatrix, true) ) {
+    //         µm.saveMatrix();
+    //     }
+    //     break;
 
     case 'readRawSettings':
         response = µm.stringFromRawSettings();
@@ -157,12 +164,13 @@ const onMessage = function(request, sender, callback) {
         µm.loadRecipes(true);
         break;
 
-    case 'setMatrixSwitch':
-        µm.tMatrix.setSwitch(request.switchName, '*', request.state);
-        if ( µm.pMatrix.setSwitch(request.switchName, '*', request.state) ) {
-            µm.saveMatrix();
-        }
-        break;
+    // legacy referrer-spoof
+    // case 'setMatrixSwitch':
+    //     µm.tMatrix.setSwitch(request.switchName, '*', request.state);
+    //     if ( µm.pMatrix.setSwitch(request.switchName, '*', request.state) ) {
+    //         µm.saveMatrix();
+    //     }
+    //     break;
 
     case 'userSettings':
         if ( request.hasOwnProperty('value') === false ) {
@@ -172,7 +180,8 @@ const onMessage = function(request, sender, callback) {
         break;
 
     case 'whitelistMatrixCell':
-        µm.tMatrix.whitelistCell(
+        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
+        matrix.whitelistCell(
             request.srcHostname,
             request.desHostname,
             request.type
@@ -207,9 +216,9 @@ vAPI.messaging.setup(onMessage);
 
 const µm = µMatrix;
 
-const RowSnapshot = function(srcHostname, desHostname, desDomain) {
+const RowSnapshot = function(srcHostname, desHostname, desDomain, matrix) {
     this.domain = desDomain;
-    this.temporary = µm.tMatrix.evaluateRowZXY(srcHostname, desHostname);
+    this.temporary = matrix.evaluateRowZXY(srcHostname, desHostname);
     this.permanent = µm.pMatrix.evaluateRowZXY(srcHostname, desHostname);
     this.counts = RowSnapshot.counts.slice();
     this.totals = RowSnapshot.counts.slice();
@@ -226,6 +235,8 @@ RowSnapshot.counts = (( ) => {
 const matrixSnapshotFromPage = function(pageStore, details) {
     const µmuser = µm.userSettings;
     const headerIndices = µm.Matrix.columnHeaderIndices;
+
+    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
 
     const r = {
         appVersion: vAPI.app.version,
@@ -252,8 +263,8 @@ const matrixSnapshotFromPage = function(pageStore, details) {
         rowCount: 0,
         scope: '*',
         tabId: pageStore.tabId,
-        tMatrixModified: µm.tMatrix.modifiedTime !== details.tMatrixModifiedTime,
-        tMatrixModifiedTime: µm.tMatrix.modifiedTime,
+        tMatrixModified: matrix.modifiedTime !== details.tMatrixModifiedTime,
+        tMatrixModifiedTime: matrix.modifiedTime,
         tSwitches: {},
         url: pageStore.pageUrl,
         userSettings: {
@@ -276,13 +287,13 @@ const matrixSnapshotFromPage = function(pageStore, details) {
     }
 
     for ( const switchName of µm.Matrix.switchNames ) {
-        r.tSwitches[switchName] = µm.tMatrix.evaluateSwitchZ(switchName, r.scope);
+        r.tSwitches[switchName] = matrix.evaluateSwitchZ(switchName, r.scope);
         r.pSwitches[switchName] = µm.pMatrix.evaluateSwitchZ(switchName, r.scope);
     }
 
     // These rows always exist
-    r.rows['*'] = new RowSnapshot(r.scope, '*', '*');
-    r.rows['1st-party'] = new RowSnapshot(r.scope, '1st-party', '1st-party');
+    r.rows['*'] = new RowSnapshot(r.scope, '*', '*', matrix);
+    r.rows['1st-party'] = new RowSnapshot(r.scope, '1st-party', '1st-party', matrix);
     r.rowCount += 1;
 
     const µmuri = µm.URI;
@@ -311,7 +322,7 @@ const matrixSnapshotFromPage = function(pageStore, details) {
         for (;;) {
             // If row exists, ancestors exist
             if ( r.rows.hasOwnProperty(desHostname) !== false ) { break; }
-            r.rows[desHostname] = new RowSnapshot(r.scope, desHostname, reqDomain);
+            r.rows[desHostname] = new RowSnapshot(r.scope, desHostname, reqDomain, matrix);
             r.rowCount += 1;
             if ( desHostname === reqDomain ) { break; }
             const pos = desHostname.indexOf('.');
@@ -332,7 +343,7 @@ const matrixSnapshotFromPage = function(pageStore, details) {
         row.totals[anyIndex] += count;
     }
 
-    r.diff = µm.tMatrix.diff(µm.pMatrix, r.hostname, Object.keys(r.rows));
+    r.diff = matrix.diff(µm.pMatrix, r.hostname, Object.keys(r.rows));
 
     return r;
 };
@@ -348,6 +359,8 @@ const matrixSnapshotFromRule = function(rule, details) {
     const headerIndices = µm.Matrix.columnHeaderIndices;
     const [ srchn, deshn, type ] = rule.trim().split(/\s+/);
     const now = Date.now();
+
+    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
 
     const r = {
         appVersion: vAPI.app.version,
@@ -368,8 +381,8 @@ const matrixSnapshotFromRule = function(rule, details) {
         rows: {},
         rowCount: 0,
         scope: '*',
-        tMatrixModified: µm.tMatrix.modifiedTime !== details.tMatrixModifiedTime,
-        tMatrixModifiedTime: µm.tMatrix.modifiedTime,
+        tMatrixModified: matrix.modifiedTime !== details.tMatrixModifiedTime,
+        tMatrixModifiedTime: matrix.modifiedTime,
         tSwitches: {},
         url: `https://${srchn}/`,
         userSettings: {
@@ -392,13 +405,13 @@ const matrixSnapshotFromRule = function(rule, details) {
     }
 
     for ( const switchName of µm.Matrix.switchNames ) {
-        r.tSwitches[switchName] = µm.tMatrix.evaluateSwitchZ(switchName, r.scope);
+        r.tSwitches[switchName] = martrix.evaluateSwitchZ(switchName, r.scope);
         r.pSwitches[switchName] = µm.pMatrix.evaluateSwitchZ(switchName, r.scope);
     }
 
     // These rows always exist
-    r.rows['*'] = new RowSnapshot(r.scope, '*', '*');
-    r.rows['1st-party'] = new RowSnapshot(r.scope, '1st-party', '1st-party');
+    r.rows['*'] = new RowSnapshot(r.scope, '*', '*', matrix);
+    r.rows['1st-party'] = new RowSnapshot(r.scope, '1st-party', '1st-party', matrix);
     r.rowCount += 1;
 
     const µmuri = µm.URI;
@@ -419,7 +432,7 @@ const matrixSnapshotFromRule = function(rule, details) {
         for (;;) {
             // If row exists, ancestors exist
             if ( r.rows.hasOwnProperty(desHostname) !== false ) { break; }
-            r.rows[desHostname] = new RowSnapshot(r.scope, desHostname, reqDomain);
+            r.rows[desHostname] = new RowSnapshot(r.scope, desHostname, reqDomain, matrix);
             r.rowCount += 1;
             if ( desHostname === reqDomain ) { break; }
             const pos = desHostname.indexOf('.');
@@ -440,7 +453,7 @@ const matrixSnapshotFromRule = function(rule, details) {
         row.totals[anyIndex] += count;
     }
 
-    r.diff = µm.tMatrix.diff(µm.pMatrix, r.hostname, Object.keys(r.rows));
+    r.diff = matrix.diff(µm.pMatrix, r.hostname, Object.keys(r.rows));
 
     return r;
 };
@@ -450,8 +463,9 @@ const matrixSnapshotFromAny = async function(sender, details) {
     if ( typeof details.tabId === 'number' && details.tabId !== 0 ) {
         const pageStore = µm.pageStoreFromTabId(details.tabId);
         if ( pageStore === null ) { return 'ENOTFOUND'; }
+        let matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
         if (
-            µm.tMatrix.modifiedTime === details.tMatrixModifiedTime &&
+            matrix.modifiedTime === details.tMatrixModifiedTime &&
             µm.pMatrix.modifiedTime === details.pMatrixModifiedTime &&
             pageStore.mtxContentModifiedTime === details.mtxContentModifiedTime &&
             pageStore.mtxCountModifiedTime === details.mtxCountModifiedTime
@@ -508,6 +522,7 @@ const onMessage = function(request, sender, callback) {
 
     // Sync
     let response;
+    let matrix;
 
     switch ( request.what ) {
     case 'applyRecipe':
@@ -519,25 +534,29 @@ const onMessage = function(request, sender, callback) {
         break;
 
     case 'toggleMatrixSwitch':
-        µm.tMatrix.setSwitchZ(
+        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
+        matrix.setSwitchZ(
             request.switchName,
             request.srcHostname,
-            µm.tMatrix.evaluateSwitchZ(request.switchName, request.srcHostname) === false
+            matrix.evaluateSwitchZ(request.switchName, request.srcHostname) === false
         );
         break;
 
     case 'applyDiffToPermanentMatrix': // aka "persist"
-        if ( µm.pMatrix.applyDiff(request.diff, µm.tMatrix) ) {
+        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
+        if ( µm.pMatrix.applyDiff(request.diff, matrix) ) {
             µm.saveMatrix();
         }
         break;
 
     case 'applyDiffToTemporaryMatrix': // aka "revert"
-        µm.tMatrix.applyDiff(request.diff, µm.pMatrix);
+        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
+        matrix.applyDiff(request.diff, µm.pMatrix);
         break;
 
     case 'revertTemporaryMatrix':
-        µm.tMatrix.assign(µm.pMatrix);
+        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
+        matrix.assign(µm.pMatrix);
         break;
 
     default:
@@ -570,7 +589,7 @@ const µm = µMatrix;
 
 /******************************************************************************/
 
-const foundInlineCode = function(tabId, pageStore, details, type) {
+const foundInlineCode = function(tabId, pageStore, details, type, matrix) {
     if ( pageStore === null ) { return; }
 
     const srcHn = pageStore.pageHostname;
@@ -579,7 +598,7 @@ const foundInlineCode = function(tabId, pageStore, details, type) {
 
     let blocked = details.blocked;
     if ( blocked === undefined ) {
-        blocked = µm.mustBlock(srcHn, desHn, type);
+        blocked = matrix.mustBlock(srcHn, desHn, type);
     }
 
     const mapTo = {
@@ -604,13 +623,13 @@ const foundInlineCode = function(tabId, pageStore, details, type) {
 
 /******************************************************************************/
 
-const contentScriptLocalStorageHandler = function(tabId, originURL) {
+const contentScriptLocalStorageHandler = function(tabId, originURL, matrix) {
     const tabContext = µm.tabContextManager.lookup(tabId);
     if ( tabContext === null ) { return; }
 
     const srcHn = tabContext.rootHostname;
     const desHn = vAPI.hostnameFromURI(originURL);
-    const blocked = µm.mustBlock(srcHn, desHn, 'cookie');
+    const blocked = matrix.mustBlock(srcHn, desHn, 'cookie');
 
     const pageStore = µm.pageStoreFromTabId(tabId);
     if ( pageStore !== null ) {
@@ -710,10 +729,12 @@ const onMessage = function(request, sender, callback) {
 
     // Sync
     let response;
+    let matrix;
 
     switch ( request.what ) {
     case 'contentScriptHasLocalStorage':
-        response = contentScriptLocalStorageHandler(tabId, request.originURL);
+        matrix = sender.tab.incognito ? µm.iMatrix : µm.tMatrix;
+        response = contentScriptLocalStorageHandler(tabId, request.originURL, matrix);
         break;
 
     case 'lookupBlockedCollapsibles':
@@ -722,15 +743,17 @@ const onMessage = function(request, sender, callback) {
 
     case 'mustRenderNoscriptTags?':
         if ( tabContext === null ) { break; }
+        matrix = sender.tab.incognito ? µm.iMatrix : µm.tMatrix;
         response =
-            µm.tMatrix.mustBlock(srcHn, srcHn, 'script') &&
-            µm.tMatrix.evaluateSwitchZ('noscript-spoof', srcHn);
+            matrix.mustBlock(srcHn, srcHn, 'script') &&
+            matrix.evaluateSwitchZ('noscript-spoof', srcHn);
         if ( pageStore !== null ) {
             pageStore.hasNoscriptTags = true;
         }
         break;
 
     case 'securityPolicyViolation':
+        matrix = sender.tab.incognito ? µm.iMatrix : µm.tMatrix;
         if ( request.directive === 'worker-src' ) {
             let desURL = request.blockedURI;
             let desHn = µm.URI.hostnameFromURI(desURL);
@@ -752,14 +775,15 @@ const onMessage = function(request, sender, callback) {
                   .toLogger();
             }
         } else if ( request.directive === 'script-src' ) {
-            foundInlineCode(tabId, pageStore, request, 'script');
+            foundInlineCode(tabId, pageStore, request, 'script', matrix);
         } else if ( request.directive === 'style-src' ) {
-            foundInlineCode(tabId, pageStore, request, 'css');
+            foundInlineCode(tabId, pageStore, request, 'css', matrix);
         }
         break;
 
     case 'referrer':
-        let spoof = µm.mustBlock(srcHn, srcHn, 'referrer');
+        matrix = sender.tab.incognito ? µm.iMatrix : µm.tMatrix;
+        let spoof = matrix.mustBlock(srcHn, srcHn, 'referrer');
         if (spoof) {
             response = tabContext.origin + '/';
         }
@@ -770,7 +794,8 @@ const onMessage = function(request, sender, callback) {
 
     case 'shutdown?':
         if ( tabContext !== null ) {
-            response = µm.tMatrix.evaluateSwitchZ('matrix-off', srcHn);
+            matrix = sender.tab.incognito ? µm.iMatrix : µm.tMatrix;
+            response = matrix.evaluateSwitchZ('matrix-off', srcHn);
         }
         break;
 
@@ -955,6 +980,7 @@ const onMessage = function(request, sender, callback) {
 
     // Sync
     let response;
+    let matrix;
 
     switch ( request.what ) {
     case 'getAllUserData':
@@ -973,8 +999,9 @@ const onMessage = function(request, sender, callback) {
         /* falls through */
 
     case 'getRuleset':
+        matrix = sender.tab.incognito ? µm.iMatrix : µm.tMatrix;
         response = {
-            temporaryRules: µm.tMatrix.toArray(),
+            temporaryRules: matrix.toArray(),
             permanentRules: µm.pMatrix.toArray()
         };
         break;

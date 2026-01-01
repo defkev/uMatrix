@@ -52,6 +52,8 @@
 
     µm.tMatrix = new µm.Matrix();
     µm.tMatrix.assign(µm.pMatrix);
+    // alias incognito matrix to mimic old behavior
+    µm.iMatrix = µm.tMatrix;
 }
 
 /******************************************************************************/
@@ -63,13 +65,13 @@
 
 /******************************************************************************/
 
-µMatrix.mustBlock = function(srcHostname, desHostname, type) {
-    return this.tMatrix.mustBlock(srcHostname, desHostname, type);
-};
+// µMatrix.mustBlock = function(srcHostname, desHostname, type) {
+//     return this.tMatrix.mustBlock(srcHostname, desHostname, type);
+// };
 
-µMatrix.mustAllow = function(srcHostname, desHostname, type) {
-    return this.mustBlock(srcHostname, desHostname, type) === false;
-};
+// µMatrix.mustAllow = function(srcHostname, desHostname, type) {
+//     return this.mustBlock(srcHostname, desHostname, type) === false;
+// };
 
 /******************************************************************************/
 

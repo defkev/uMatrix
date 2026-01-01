@@ -293,6 +293,7 @@ self.addEventListener('rawSettingsChanged', ( ) => {
         this.pMatrix.fromArray(bin.userMatrix);
     }
     this.tMatrix.assign(this.pMatrix);
+    this.iMatrix.assign(this.pMatrix);
 };
 
 /******************************************************************************/
