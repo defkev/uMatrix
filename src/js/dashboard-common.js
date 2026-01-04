@@ -147,5 +147,13 @@ uDom('.whatisthis').on('click', ev => {
       .classList.toggle('whatisthis-expanded');
 });
 
+vAPI.messaging.send('dashboard', {
+    what: 'isPrivate'
+}).then((isPrivate) => {
+    if (isPrivate) {
+        document.body.classList.add('incognito');
+    }
+});
+
 // <<<<< end of local scope
 }

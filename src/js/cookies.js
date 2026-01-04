@@ -198,8 +198,10 @@ const recordPageCookie = (( ) => {
             for ( const cookieKey of qentry[1] ) {
                 let cookieEntry = cookieDict.get(cookieKey);
                 if ( cookieEntry === undefined ) { continue; }
+
                 const tabContext = µm.tabContextManager.lookup(pageStore.tabId);
-                let matrix = tabContext.incogonito ? µm.iMatrix : µm.tMatrix;
+                const matrix = tabContext.incognito ? µm.iMatrix : µm.tMatrix;
+
                 let blocked = matrix.mustBlock(
                     pageStore.pageHostname,
                     cookieEntry.hostname,

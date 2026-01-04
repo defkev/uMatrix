@@ -11,6 +11,16 @@
   src: local('httpsb'), url(fonts/Roboto_Condensed/RobotoCondensed-Light.ttf) format('truetype');
 }
 
+:root {
+    --primary-color: #24c;
+    --secondary-color: #139;
+}
+
+.incognito {
+    --primary-color: #4B0082;
+    --secondary-color: #25003e;
+}
+
 body {
     font: 14px sans-serif;
     }

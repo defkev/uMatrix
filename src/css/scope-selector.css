@@ -44,15 +44,15 @@
     width: 16em;
     }
 #specificScope.on {
-    background-color: #24c;
-    border-color: #24c;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
     }
 #specificScope > span {
     background-color: #ccc;
     justify-content: flex-end;
     }
 #specificScope > span.on {
-    background-color: #24c;
+    background-color: var(--primary-color);
     }
 #specificScope > span:first-of-type:not(.on):hover,
 #specificScope > span:first-of-type:not(.on):hover ~ span:not(.on),
@@ -64,7 +64,7 @@
 #specificScope > span:not(.on) + span:not(.on):hover ~ span,
 #specificScope > span.on + span:hover,
 #specificScope > span.on + span:hover ~ span {
-    background-color: #139;
+    background-color: var(--secondary-color);
     }
 #specificScope > span:first-of-type {
     flex: 1;

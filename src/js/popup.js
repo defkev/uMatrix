@@ -484,7 +484,7 @@ const handleFilter = function(button, leaning) {
         srcHostname: matrixSnapshot.scope,
         desHostname: desHostname,
         type: type,
-        incognito: browser.extension.inIncognitoContext
+        tabId: matrixSnapshot.tabId
     }).then(( ) => {
         updateMatrixSnapshot();
     });
@@ -1043,6 +1043,9 @@ const initMenuEnvironment = function() {
         'font-size',
         getUserSetting('displayTextSize')
     );
+    if (matrixSnapshot.isPrivate) {
+        document.body.classList.add('incognito');
+    }
     uDom.nodeFromId('version').textContent = matrixSnapshot.appVersion || '';
     document.body.classList.toggle(
         'colorblind',
@@ -1129,7 +1132,7 @@ const toggleMatrixSwitch = function(ev) {
         what: 'toggleMatrixSwitch',
         switchName: switchName,
         srcHostname: matrixSnapshot.scope,
-        incognito: browser.extension.inIncognitoContext
+        tabId: matrixSnapshot.tabId
     }).then(( ) => {
         updateMatrixSnapshot();
     });
@@ -1156,7 +1159,7 @@ const persistMatrix = function() {
     vAPI.messaging.send('popup.js', {
         what: 'applyDiffToPermanentMatrix',
         diff: matrixSnapshot.diff,
-        incognito: browser.extension.inIncognitoContext
+        tabId: matrixSnapshot.tabId
     }).then(( ) => {
         updateMatrixSnapshot();
     });
@@ -1171,7 +1174,7 @@ const revertMatrix = function() {
     vAPI.messaging.send('popup.js', {
         what: 'applyDiffToTemporaryMatrix',
         diff: matrixSnapshot.diff,
-        incognito: browser.extension.inIncognitoContext
+        tabId: matrixSnapshot.tabId
     }).then(( ) => {
         updateMatrixSnapshot();
     });
@@ -1307,7 +1310,7 @@ const recipeManager = (( ) => {
 const revertAll = function() {
     vAPI.messaging.send('popup.js', {
         what: 'revertTemporaryMatrix',
-        incognito: browser.extension.inIncognitoContext
+        tabId: matrixSnapshot.tabId
     }).then(( ) => {
         updateMatrixSnapshot();
     });
@@ -1341,7 +1344,7 @@ const gotoExtensionURL = function(ev) {
         url,
         select: true,
         shiftKey: ev.shiftKey,
-        incognito: browser.extension.inIncognitoContext
+        tabId: matrixSnapshot.tabId
     });
     dropDownMenuHide();
     vAPI.closePopup();
@@ -1457,8 +1460,7 @@ const matrixSnapshotPoller = (( ) => {
             mtxCountModifiedTime: matrixSnapshot.mtxCountModifiedTime,
             mtxDiffCount: matrixSnapshot.diff.length,
             pMatrixModifiedTime: matrixSnapshot.pMatrixModifiedTime,
-            tMatrixModifiedTime: matrixSnapshot.tMatrixModifiedTime,
-            incognito: browser.extension.inIncognitoContext
+            tMatrixModifiedTime: matrixSnapshot.tMatrixModifiedTime
         }).then(response => {
             onPolled(response);
         });
@@ -1486,8 +1488,7 @@ const matrixSnapshotPoller = (( ) => {
 
     vAPI.messaging.send('popup.js', {
         what: 'matrixSnapshot',
-        tabId: matrixSnapshot.tabId,
-        incognito: browser.extension.inIncognitoContext
+        tabId: matrixSnapshot.tabId
     }).then(response => {
         if ( response instanceof Object ) {
             matrixSnapshot = preprocessMatrixSnapshot(response);

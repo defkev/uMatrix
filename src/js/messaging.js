@@ -57,11 +57,12 @@ const onMessage = function(request, sender, callback) {
 
     // Sync
     let response;
-    let matrix;
+
+    const tabContext = µm.tabContextManager.lookup(request.tabId || sender.tab.id);
+    const matrix = tabContext.incognito ? µm.iMatrix : µm.tMatrix;
 
     switch ( request.what ) {
     case 'blacklistMatrixCell':
-        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
         matrix.blacklistCell(
             request.srcHostname,
             request.desHostname,
@@ -119,11 +120,14 @@ const onMessage = function(request, sender, callback) {
         break;
 
     case 'gotoExtensionURL':
+        request.incognito = µm.rawSettings.isolateMatrix ? tabContext.incognito : null;
+        if (!(vAPI.webextFlavor.soup.has('mobile') && request.incognito)) {
+            delete request.tabId; // Android bug: tabs.create will not inherit incognito value?!?
+        }
         µm.gotoExtensionURL(request);
         break;
 
     case 'graylistMatrixCell':
-        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
         matrix.graylistCell(
             request.srcHostname,
             request.desHostname,
@@ -132,7 +136,6 @@ const onMessage = function(request, sender, callback) {
         break;
 
     case 'mustBlock':
-        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
         response = matrix.mustBlock(
             request.scope,
             request.hostname,
@@ -180,7 +183,6 @@ const onMessage = function(request, sender, callback) {
         break;
 
     case 'whitelistMatrixCell':
-        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
         matrix.whitelistCell(
             request.srcHostname,
             request.desHostname,
@@ -236,7 +238,8 @@ const matrixSnapshotFromPage = function(pageStore, details) {
     const µmuser = µm.userSettings;
     const headerIndices = µm.Matrix.columnHeaderIndices;
 
-    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
+    const tabContext = µm.tabContextManager.lookup(pageStore.tabId);
+    const matrix = tabContext.incognito ? µm.iMatrix : µm.tMatrix;
 
     const r = {
         appVersion: vAPI.app.version,
@@ -252,6 +255,7 @@ const matrixSnapshotFromPage = function(pageStore, details) {
         hasHostnameAliases: pageStore.hasHostnameAliases,
         headerIndices: Array.from(headerIndices),
         hostname: pageStore.pageHostname,
+        isPrivate: µm.rawSettings.isolateMatrix && tabContext.incognito,
         mtxContentModified: pageStore.mtxContentModifiedTime !== details.mtxContentModifiedTime,
         mtxCountModified: pageStore.mtxCountModifiedTime !== details.mtxCountModifiedTime,
         mtxContentModifiedTime: pageStore.mtxContentModifiedTime,
@@ -360,7 +364,8 @@ const matrixSnapshotFromRule = function(rule, details) {
     const [ srchn, deshn, type ] = rule.trim().split(/\s+/);
     const now = Date.now();
 
-    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
+    const tabContext = µm.tabContextManager.lookup(details.tabId);
+    const matrix = tabContext.incognito ? µm.iMatrix : µm.tMatrix;
 
     const r = {
         appVersion: vAPI.app.version,
@@ -371,6 +376,7 @@ const matrixSnapshotFromRule = function(rule, details) {
         domain: vAPI.domainFromHostname(srchn),
         headerIndices: Array.from(headerIndices),
         hostname: srchn,
+        isPrivate: µm.rawSettings.isolateMatrix && tabContext.incognito,
         mtxContentModified: false,
         mtxCountModified: false,
         mtxContentModifiedTime: now,
@@ -463,7 +469,10 @@ const matrixSnapshotFromAny = async function(sender, details) {
     if ( typeof details.tabId === 'number' && details.tabId !== 0 ) {
         const pageStore = µm.pageStoreFromTabId(details.tabId);
         if ( pageStore === null ) { return 'ENOTFOUND'; }
-        let matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
+
+        const tabContext = µm.tabContextManager.lookup(details.tabId);
+        const matrix = tabContext.incognito ? µm.iMatrix : µm.tMatrix;
+
         if (
             matrix.modifiedTime === details.tMatrixModifiedTime &&
             µm.pMatrix.modifiedTime === details.pMatrixModifiedTime &&
@@ -522,7 +531,9 @@ const onMessage = function(request, sender, callback) {
 
     // Sync
     let response;
-    let matrix;
+
+    const tabContext = µm.tabContextManager.lookup(request.tabId);
+    const matrix = tabContext && tabContext.incognito ? µm.iMatrix : µm.tMatrix;
 
     switch ( request.what ) {
     case 'applyRecipe':
@@ -534,7 +545,6 @@ const onMessage = function(request, sender, callback) {
         break;
 
     case 'toggleMatrixSwitch':
-        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
         matrix.setSwitchZ(
             request.switchName,
             request.srcHostname,
@@ -543,19 +553,16 @@ const onMessage = function(request, sender, callback) {
         break;
 
     case 'applyDiffToPermanentMatrix': // aka "persist"
-        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
         if ( µm.pMatrix.applyDiff(request.diff, matrix) ) {
             µm.saveMatrix();
         }
         break;
 
     case 'applyDiffToTemporaryMatrix': // aka "revert"
-        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
         matrix.applyDiff(request.diff, µm.pMatrix);
         break;
 
     case 'revertTemporaryMatrix':
-        matrix = request.incognito ? µm.iMatrix : µm.tMatrix;
         matrix.assign(µm.pMatrix);
         break;
 
@@ -729,11 +736,11 @@ const onMessage = function(request, sender, callback) {
 
     // Sync
     let response;
-    let matrix;
+
+    const matrix = tabContext && tabContext.incognito ? µm.iMatrix : µm.tMatrix;
 
     switch ( request.what ) {
     case 'contentScriptHasLocalStorage':
-        matrix = sender.tab.incognito ? µm.iMatrix : µm.tMatrix;
         response = contentScriptLocalStorageHandler(tabId, request.originURL, matrix);
         break;
 
@@ -743,7 +750,6 @@ const onMessage = function(request, sender, callback) {
 
     case 'mustRenderNoscriptTags?':
         if ( tabContext === null ) { break; }
-        matrix = sender.tab.incognito ? µm.iMatrix : µm.tMatrix;
         response =
             matrix.mustBlock(srcHn, srcHn, 'script') &&
             matrix.evaluateSwitchZ('noscript-spoof', srcHn);
@@ -753,7 +759,6 @@ const onMessage = function(request, sender, callback) {
         break;
 
     case 'securityPolicyViolation':
-        matrix = sender.tab.incognito ? µm.iMatrix : µm.tMatrix;
         if ( request.directive === 'worker-src' ) {
             let desURL = request.blockedURI;
             let desHn = µm.URI.hostnameFromURI(desURL);
@@ -782,7 +787,6 @@ const onMessage = function(request, sender, callback) {
         break;
 
     case 'referrer':
-        matrix = sender.tab.incognito ? µm.iMatrix : µm.tMatrix;
         let spoof = matrix.mustBlock(srcHn, srcHn, 'referrer');
         if (spoof) {
             response = tabContext.origin + '/';
@@ -794,7 +798,6 @@ const onMessage = function(request, sender, callback) {
 
     case 'shutdown?':
         if ( tabContext !== null ) {
-            matrix = sender.tab.incognito ? µm.iMatrix : µm.tMatrix;
             response = matrix.evaluateSwitchZ('matrix-off', srcHn);
         }
         break;
@@ -956,7 +959,6 @@ const resetUserData = async function() {
 /******************************************************************************/
 
 const onMessage = function(request, sender, callback) {
-
     // Async
     switch ( request.what ) {
     case 'getAssets':
@@ -980,7 +982,9 @@ const onMessage = function(request, sender, callback) {
 
     // Sync
     let response;
-    let matrix;
+
+    const tabContext = µm.tabContextManager.lookup(sender.tab.id);
+    const matrix = tabContext.incognito ? µm.iMatrix : µm.tMatrix;
 
     switch ( request.what ) {
     case 'getAllUserData':
@@ -999,7 +1003,6 @@ const onMessage = function(request, sender, callback) {
         /* falls through */
 
     case 'getRuleset':
-        matrix = sender.tab.incognito ? µm.iMatrix : µm.tMatrix;
         response = {
             temporaryRules: matrix.toArray(),
             permanentRules: µm.pMatrix.toArray()
@@ -1025,6 +1028,10 @@ const onMessage = function(request, sender, callback) {
 
     case 'restoreAllUserData':
         restoreUserData(request.userData);
+        break;
+
+    case 'isPrivate':
+        response = µm.rawSettings.isolateMatrix && tabContext.incognito;
         break;
 
     default:

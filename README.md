@@ -10,15 +10,13 @@ If you have any custom `referrer-spoof` rules in your config, you need to manual
 There is currently no code to migrate a legacy config to the new syntax, so if you have many `referrer-spoof` rules, good luck!
 
 > [!WARNING]
-> Starting with version `1.5.4` uMatrix for **Firefox** will isolate temporary rules from private (incognito) in non-private (normal) windows and vice-versa (https://github.com/gorhill/uMatrix/issues/350) to prevent exceptions added for domains visited in private windows from leaking into the normal browser session.
+> Starting with version `1.5.5` uMatrix will isolate temporary rules from private (incognito) in non-private (normal) windows and vice-versa (https://github.com/gorhill/uMatrix/issues/350) to prevent exceptions added for domains visited in private windows from leaking into the normal browser session.
 
 Temporary rules can still be committed in either private or non-private windows and then restored in the other.
 
 Temporary rules in private windows will be cleared the moment the last private window gets closed.
 
 To restore the old (insecure) behavior of sharing temporary rulesets between windows, set `isolateMatrix` to `false` under advanced settings and restart uMatrix.
-
-**This feature is currently only available in Firefox**
 
 > [!TIP]
 > A signed Firefox XPI and packed Chrome ZIP can be downloaded under releases (on the right ->)

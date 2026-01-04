@@ -2,6 +2,7 @@
     "scripts": {
         "debug": "npm run watch && npm run run",
         "run": "start web-ext run -s dist\\build\\debug -f nightly -p development --devtools",
+        "runadb": "web-ext run -s dist\\build\\debug -t firefox-android --adb-device emulator-5554 --adb-remove-old-artifacts",
         "watch": "start cpx -v src\\**\\* dist\\build\\debug --watch",
         "buildff": "web-ext build -s dist\\build\\uMatrix.firefox -a dist\\build\\web-ext-artifacts -n {name}.firefox-{version}.zip",
         "buildcr": "web-ext build -s dist\\build\\uMatrix.chromium -a dist\\build\\web-ext-artifacts -n {name}.chromium-{version}.zip"

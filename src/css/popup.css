@@ -99,7 +99,7 @@ a {
     padding: 0.3em 0.4em;
     }
 .toolbar .fa-icon.scopeRel {
-    fill: #24c;
+    fill: var(--primary-color);
     }
 body[data-scope="*"] .toolbar .fa-icon.scopeRel {
     fill: #000;
@@ -329,7 +329,7 @@ button.disabled > span.badge {
     }
 
 body .toolbar .scopeRel {
-    color: #24c;
+    color: var(--primary-color);
     }
 body[data-scope="*"] .toolbar .scopeRel {
     color: #000;

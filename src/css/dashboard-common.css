@@ -79,3 +79,10 @@ input[disabled] + label {
     padding: 5px;
     background-color: #FEDAE0;
     }
+
+.incognito input {
+    accent-color: var(--primary-color);
+}
+.incognito a {
+    color: var(--primary-color);
+}

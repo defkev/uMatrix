@@ -505,7 +505,7 @@ vAPI.Tabs = class {
             : targetURL.slice(0, pos);
 
         const tabs = await vAPI.tabs.query({ url: targetURLWithoutHash });
-        let tab = tabs.find(tab => tab.incognito === details.incognito);
+        let tab = details.incognito === null ? tabs[0] : tabs.find(tab => tab.incognito === details.incognito);
         if (!tab) {
             this.create(targetURL, details);
             return;
