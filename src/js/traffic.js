@@ -39,7 +39,9 @@ const onBeforeRootFrameRequestHandler = function(fctxt, details) {
     const tabId = fctxt.tabId;
     const srcHn = fctxt.getTabHostname();
 
-    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
+    const tabContext = µm.tabContextManager.mustLookup(details.tabId);
+    const matrix = tabContext.incognito ? µm.iMatrix : µm.tMatrix;
+
     // Disallow request as per matrix?
     const blocked = matrix.mustBlock(srcHn, desHn, type);
 
@@ -134,13 +136,14 @@ const onBeforeRequestHandler = function(details) {
     // to scope on unknown scheme? Etc.
     // https://github.com/gorhill/httpswitchboard/issues/191
     // https://github.com/gorhill/httpswitchboard/issues/91#issuecomment-37180275
-    const tabContext = µm.tabContextManager.mustLookup(details.tabId);
     const tabId = fctxt.tabId;
     const srcHn = fctxt.getTabHostname();
     const desHn = fctxt.getHostname();
     let specificity = 0;
 
-    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
+    const tabContext = µm.tabContextManager.mustLookup(tabId);
+    const matrix = tabContext.incognito ? µm.iMatrix : µm.tMatrix;
+
     let blocked = matrix.mustBlock(srcHn, desHn, type);
     if ( blocked ) {
         specificity = matrix.specificityRegister;
@@ -303,7 +306,11 @@ const onBeforeSendCookie = function(fctxt, details) {
     if ( iHeader === -1 ) { return false; }
 
     const µm = µMatrix;
-    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
+    const tabId = fctxt.tabId
+
+    const tabContext = µm.tabContextManager.mustLookup(tabId);
+    const matrix = tabContext.incognito ? µm.iMatrix : µm.tMatrix;
+
     const blocked = matrix.mustBlock(
         fctxt.getTabHostname(),
         fctxt.getHostname(),
@@ -316,7 +323,7 @@ const onBeforeSendCookie = function(fctxt, details) {
     µm.cookieHeaderFoiledCounter++;
 
     if ( fctxt.type === 'doc' ) {
-        const pageStore = µm.mustPageStoreFromTabId(fctxt.tabId);
+        const pageStore = µm.mustPageStoreFromTabId(tabId);
         pageStore.perLoadBlockedRequestCount++;
         if ( µm.logger.enabled ) {
             fctxt.setRealm('network')
@@ -345,10 +352,13 @@ const onBeforeSendReferrer = function(fctxt, details) {
     }
 
     const µm = µMatrix;
-    const pageStore = µm.mustPageStoreFromTabId(fctxt.tabId);
+    const tabId = fctxt.tabId;
+    const pageStore = µm.mustPageStoreFromTabId(tabId);
     pageStore.has3pReferrer = true;
 
-    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
+    const tabContext = µm.tabContextManager.mustLookup(tabId);
+    const matrix = tabContext.incognito ? µm.iMatrix : µm.tMatrix;
+
     const mustSpoof = matrix.mustBlock(
             fctxt.getTabHostname(),
             fctxt.getHostname(),
@@ -417,7 +427,8 @@ const onHeadersReceivedHandler = function(details) {
     const srcHn = fctxt.getTabHostname();
     const desHn = fctxt.getHostname();
 
-    const matrix = details.incognito ? µm.iMatrix : µm.tMatrix;
+    const tabContext = µm.tabContextManager.mustLookup(details.tabId);
+    const matrix = tabContext.incognito ? µm.iMatrix : µm.tMatrix;
 
     // Inline script tags.
     if ( matrix.mustBlock(srcHn, desHn, 'script' ) ) {

@@ -264,7 +264,7 @@ housekeep itself.
 
     // Update just force all properties to be updated to match the most recent
     // root URL.
-    TabContext.prototype.update = async function() {
+    TabContext.prototype.update = function() {
         this.netFilteringReadTime = 0;
         if ( this.stack.length === 0 ) {
             this.rawURL =
@@ -285,8 +285,7 @@ housekeep itself.
         this.rootDomain =
             µm.URI.domainFromHostname(this.rootHostname) ||
             this.rootHostname;
-         this.secure = µm.URI.isSecureScheme(this.scheme);
-         this.incognito = await vAPI.tabs.get(this.tabId).then(tab => tab.incognito);
+        this.secure = µm.URI.isSecureScheme(this.scheme);
     };
 
     // Called whenever a candidate root URL is spotted for the tab.
@@ -340,10 +339,11 @@ housekeep itself.
 
     // These are to be used for the API of the tab context manager.
 
-    const push = function(tabId, url) {
+    const push = async function(tabId, url) {
         let entry = tabContexts.get(tabId);
         if ( entry === undefined ) {
             entry = new TabContext(tabId);
+            entry.incognito = await vAPI.tabs.get(tabId).then(tab => tab.incognito);
             entry.autodestroy();
         }
         entry.push(url);
